@@ -1,0 +1,33 @@
+// Sparse extended formulation of strict Object A over Q(b,c).
+// Auxiliary variables are uniquely defined, so localization at u*v*(u^2-v^2)
+// makes this scheme isomorphic to the compact graph and frozen bivariate models.
+option(redSB);
+option(prot);
+ring R=(0,b,c),(D,x,xd,y,Z,a1,tn,ba,bh,zinv,s,u,v),(lp(10),dp(3));
+poly p=u^3+v^3;
+poly dd=v^3-u^3;
+poly N=u^2-v^2;
+ideal I=
+ D-(1-4*p+4*b*s*dd),
+ x+(4*s^2*dd+4*s^3*p-s^3+b-4*b*s^3*p-4*b*s^4*dd),
+ xd-s^3*D,
+ y-xd+x,
+ Z-b*xd-y,
+ a1-y-4*b*p*xd-4*b*y*s*dd,
+ tn-(1-u^2*(1-s)^2),
+ ba-u^2*x^2-tn*y^2,
+ bh-u^2*s^2*x^2-tn*xd^2,
+ (-2*b*x*D+c*a1)^2*ba^3-c^2*(8*Z)^2*x^6*u^6,
+ (2*x*D*y+c*a1*xd)^2*bh^3-c^2*(8*Z*xd)^2*x^6*u^6,
+ 4*s*u^2*v^2-u^2+v^2,
+ zinv*u*v*N-1;
+print("BEGIN_OBJECTA_EXTENDED_GENERIC");
+print("generator_count="+string(size(I)));
+ideal G=std(I);
+print("generic_dimension="+string(dim(G)));
+print("generic_degree="+string(vdim(G)));
+print("generic_groebner_size="+string(size(G)));
+print("GENERIC_GROEBNER_BASIS");
+G;
+print("END_OBJECTA_EXTENDED_GENERIC");
+quit;
