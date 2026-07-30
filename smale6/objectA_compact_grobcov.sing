@@ -1,0 +1,48 @@
+// Characteristic-zero Groebner-cover attack on the strict Object-A chart.
+// This is scheme-equivalent to the frozen bivariate pair after localizing at
+// u*v*(u^2-v^2)*S(b,c): the graph equation is 4*s*u^2*v^2=u^2-v^2.
+LIB "grobcov.lib";
+option(redSB);
+ring R=(0,b,c),(s,u,v,z),dp;
+
+poly one=1;
+poly p=u^3+v^3;
+poly dd=v^3-u^3;
+poly D4=one-4*p+4*b*s*dd;
+poly Nnum=4*s^2*dd+4*s^3*p-s^3+b-4*b*s^3*p-4*b*s^4*dd;
+poly Xn=-Nnum;
+poly Xd=s^3*D4;
+poly Yn=Xd-Xn;
+poly Z=b*Xd+Yn;
+poly AA=c*Yn+4*b*c*p*Xd+4*b*c*Yn*s*dd-2*b*Xn*D4;
+poly Pd=8*c*Z;
+poly Qn=AA*Xd+2*Xn*D4*Z;
+poly Qd=Pd*Xd;
+poly Tn=one-u^2*(one-s)^2;
+poly BA=u^2*Xn^2+Tn*Yn^2;
+poly BH=u^2*s^2*Xn^2+Tn*Xd^2;
+poly FF=AA^2*BA^3-Xn^6*Pd^2*u^6;
+poly GG=Qn^2*BH^3-Xn^6*Qd^2*u^6;
+poly graph=4*s*u^2*v^2-u^2+v^2;
+
+poly edge=b*c*(2*b+c)*(2*b+c+2)
+ *(4*c-1)*(4*c+1)*(b-4*c)*(b+4*c)*(2*b-c)
+ *(b^3-c*(b+1)^2)*(b^3+c*(b+1)^2)
+ *((b*c-b-c)^2-4*b*c)
+ *((b*c-b+c)^2+4*b*c)
+ *((b*c+b-c)^2+4*b*c)
+ *((b*c+b+c)^2-4*b*c);
+poly loc=u*v*(u^2-v^2)*edge;
+ideal I=graph,FF,GG,z*loc-1;
+
+print("BEGIN_OBJECTA_COMPACT");
+print("FF_terms="+string(size(FF)));
+print("GG_terms="+string(size(GG)));
+print("graph_terms="+string(size(graph)));
+print("BEGIN_GROBCOV");
+list GC=grobcov(I,"rep",2,"comment",2);
+print("segment_count="+string(size(GC)));
+GC;
+print("END_GROBCOV");
+print("END_OBJECTA_COMPACT");
+quit;

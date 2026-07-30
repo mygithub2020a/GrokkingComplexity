@@ -1,0 +1,72 @@
+name: Smale6 CAS probe
+
+on:
+  push:
+    branches: [smale6-cas-20260729]
+  pull_request:
+    branches: [main]
+    paths:
+      - 'smale6/**'
+      - '.github/workflows/smale6-cas.yml'
+
+concurrency:
+  group: smale6-cas-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  grobcov-canary:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Singular
+        run: |
+          set -euxo pipefail
+          sudo apt-get update
+          sudo apt-get install -y singular
+          Singular --version | tee singular-version.txt
+      - name: Run dimension-jump canary
+        run: Singular -q smale6/grobcov_canary.sing | tee grobcov-canary.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: grobcov-canary
+          path: |
+            singular-version.txt
+            grobcov-canary.log
+          retention-days: 7
+
+  objectA-char0:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Singular
+        run: |
+          set -euxo pipefail
+          sudo apt-get update
+          sudo apt-get install -y singular
+          Singular --version | tee singular-version.txt
+      - name: Run strict Object-A characteristic-zero Groebner cover
+        shell: bash
+        run: |
+          set +e
+          /usr/bin/time -v timeout 330m Singular -q smale6/objectA_compact_grobcov.sing > objectA-char0.log 2> objectA-char0.time
+          status=$?
+          echo "$status" | tee objectA-char0.status
+          tail -n 300 objectA-char0.log || true
+          exit 0
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: objectA-char0
+          path: |
+            singular-version.txt
+            objectA-char0.log
+            objectA-char0.time
+            objectA-char0.status
+            smale6/objectA_compact_grobcov.sing
+          retention-days: 7
