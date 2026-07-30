@@ -1,0 +1,44 @@
+name: Smale6 ObjectA regular subresultant
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'smale6/objectA_subresultant_generic.sing'
+      - '.github/workflows/smale6-objectA-subres.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  subresultant-generic:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Singular
+        run: |
+          set -euxo pipefail
+          sudo apt-get update
+          sudo apt-get install -y singular
+          Singular --version | tee singular-version.txt
+      - name: Run regular subresultant calculation
+        shell: bash
+        run: |
+          set +e
+          /usr/bin/time -v timeout 330m Singular -q smale6/objectA_subresultant_generic.sing > objectA-subres.log 2> objectA-subres.time
+          status=$?
+          echo "$status" | tee objectA-subres.status
+          tail -n 300 objectA-subres.log || true
+          exit 0
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: objectA-subresultant-generic
+          path: |
+            singular-version.txt
+            objectA-subres.log
+            objectA-subres.time
+            objectA-subres.status
+            smale6/objectA_subresultant_generic.sing
+          retention-days: 7
