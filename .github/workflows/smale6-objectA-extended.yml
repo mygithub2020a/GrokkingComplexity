@@ -1,0 +1,44 @@
+name: Smale6 ObjectA sparse extended
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'smale6/objectA_extended_generic.sing'
+      - '.github/workflows/smale6-objectA-extended.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  extended-generic:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Singular
+        run: |
+          set -euxo pipefail
+          sudo apt-get update
+          sudo apt-get install -y singular
+          Singular --version | tee singular-version.txt
+      - name: Run sparse extended generic calculation
+        shell: bash
+        run: |
+          set +e
+          /usr/bin/time -v timeout 330m Singular -q smale6/objectA_extended_generic.sing > objectA-extended.log 2> objectA-extended.time
+          status=$?
+          echo "$status" | tee objectA-extended.status
+          tail -n 300 objectA-extended.log || true
+          exit 0
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: objectA-extended-generic
+          path: |
+            singular-version.txt
+            objectA-extended.log
+            objectA-extended.time
+            objectA-extended.status
+            smale6/objectA_extended_generic.sing
+          retention-days: 7
