@@ -1,0 +1,9 @@
+LIB "grobcov.lib";
+ring R=(0,a),(x,y),dp;
+ideal I=a*x,y;
+print("BEGIN_GROBCOV_CANARY");
+list GC=grobcov(I,"rep",2,"comment",2);
+print("segments="+string(size(GC)));
+GC;
+print("END_GROBCOV_CANARY");
+quit;
