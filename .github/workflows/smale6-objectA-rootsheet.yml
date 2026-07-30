@@ -1,0 +1,52 @@
+name: Smale6 ObjectA physical root-sheet
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'smale6/objectA_rootsheet_*_grobcov.sing'
+      - '.github/workflows/smale6-objectA-rootsheet.yml'
+
+concurrency:
+  group: smale6-objectA-rootsheet-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  rootsheet-cover:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      matrix:
+        chart: [u, v]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Singular
+        run: |
+          set -euxo pipefail
+          sudo apt-get update
+          sudo apt-get install -y singular
+          Singular --version | tee singular-version.txt
+      - name: Run physical root-sheet Groebner cover
+        shell: bash
+        run: |
+          set +e
+          /usr/bin/time -v timeout 330m Singular -q smale6/objectA_rootsheet_${{ matrix.chart }}_grobcov.sing > rootsheet_${{ matrix.chart }}.log 2> rootsheet_${{ matrix.chart }}.time
+          status=$?
+          echo "$status" | tee rootsheet_${{ matrix.chart }}.status
+          tail -n 300 rootsheet_${{ matrix.chart }}.log || true
+          exit 0
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: objectA-rootsheet-${{ matrix.chart }}
+          path: |
+            singular-version.txt
+            rootsheet_${{ matrix.chart }}.log
+            rootsheet_${{ matrix.chart }}.time
+            rootsheet_${{ matrix.chart }}.status
+            smale6/objectA_rootsheet_${{ matrix.chart }}_grobcov.sing
+          retention-days: 7
