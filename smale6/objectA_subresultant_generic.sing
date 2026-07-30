@@ -1,0 +1,37 @@
+// Regular quadratic-subresultant chart of Object A over Q(b,c).
+option(redSB);
+option(prot);
+ring R=(0,b,c),(D,x,xd,y,Z,a1,tn,ba,bh,zinv,s,u,v),(lp(10),dp(3));
+poly p=u^3+v^3;
+poly dd=v^3-u^3;
+poly N=u^2-v^2;
+poly K=ba^3;
+poly H=bh^3;
+poly L1=a1^2*K*H-64*x^6*Z*u^6*(b*xd*K+y*H);
+poly N1=a1^2*K*H*(y-b*xd)+64*x^6*Z*u^6*(b^2*xd^2*K-y^2*H);
+poly E1=K*H*a1^2+64*x^6*u^6*(b^2*K*xd^2-H*y^2);
+poly core=E1^2-256*b^2*K^2*H*a1^2*xd^2*x^6*u^6;
+poly f2=a1^2*K-64*x^6*Z^2*u^6;
+ideal I=
+ D-(1-4*p+4*b*s*dd),
+ x+(4*s^2*dd+4*s^3*p-s^3+b-4*b*s^3*p-4*b*s^4*dd),
+ xd-s^3*D,
+ y-xd+x,
+ Z-b*xd-y,
+ a1-y-4*b*p*xd-4*b*y*s*dd,
+ tn-(1-u^2*(1-s)^2),
+ ba-u^2*x^2-tn*y^2,
+ bh-u^2*s^2*x^2-tn*xd^2,
+ 4*s*u^2*v^2-u^2+v^2,
+ core,
+ c*a1*xd*L1+x*D*N1,
+ zinv*u*v*N*a1*xd*x*D*Z*L1*f2-1;
+print("BEGIN_OBJECTA_SUBRESULTANT_GENERIC");
+ideal G=std(I);
+print("generic_dimension="+string(dim(G)));
+print("generic_degree="+string(vdim(G)));
+print("generic_groebner_size="+string(size(G)));
+print("GENERIC_GROEBNER_BASIS");
+G;
+print("END_OBJECTA_SUBRESULTANT_GENERIC");
+quit;
