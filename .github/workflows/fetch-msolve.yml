@@ -1,0 +1,35 @@
+name: Fetch msolve binary
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/fetch-msolve.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  fetch:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch and inspect msolve 0.10.1
+        run: |
+          set -euxo pipefail
+          curl -fL --retry 3 -o msolve.zip https://msolve.proj.lip6.fr/downloads/v0.10.1/msolve-0.10.1_linux_intel_x86.zip
+          sha256sum msolve.zip | tee msolve.zip.sha256
+          unzip -l msolve.zip | tee msolve-contents.txt
+          mkdir msolve-bin
+          unzip msolve.zip -d msolve-bin
+          find msolve-bin -type f -maxdepth 3 -exec file {} \; | tee msolve-files.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: msolve-0.10.1-linux-intel
+          path: |
+            msolve.zip
+            msolve.zip.sha256
+            msolve-contents.txt
+            msolve-files.txt
+          retention-days: 7
