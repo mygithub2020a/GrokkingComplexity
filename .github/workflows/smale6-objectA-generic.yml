@@ -1,0 +1,41 @@
+name: Smale6 ObjectA generic function-field
+
+on:
+  push:
+    branches: [smale6-objectA-generic-20260729]
+
+permissions:
+  contents: read
+
+jobs:
+  generic:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Singular
+        run: |
+          set -euxo pipefail
+          sudo apt-get update
+          sudo apt-get install -y singular
+          Singular --version | tee singular-version.txt
+      - name: Run compact generic calculation
+        shell: bash
+        run: |
+          set +e
+          /usr/bin/time -v timeout 330m Singular -q smale6/objectA_compact_generic.sing > objectA-generic.log 2> objectA-generic.time
+          status=$?
+          echo "$status" | tee objectA-generic.status
+          tail -n 300 objectA-generic.log || true
+          exit 0
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: objectA-generic
+          path: |
+            singular-version.txt
+            objectA-generic.log
+            objectA-generic.time
+            objectA-generic.status
+            smale6/objectA_compact_generic.sing
+          retention-days: 7
