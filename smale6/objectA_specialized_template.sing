@@ -1,0 +1,28 @@
+// Exact strict specialization b=c=1 of the sparse extended Object-A scheme.
+option(redSB);
+option(prot);
+ring R=__CHAR__,(D,x,xd,y,Z,a1,tn,ba,bh,zinv,s,u,v),(lp(10),dp(3));
+poly p=u^3+v^3;
+poly dd=v^3-u^3;
+poly N=u^2-v^2;
+ideal I=
+ D-(1-4*p+4*s*dd),
+ x+(4*s^2*dd+4*s^3*p-s^3+1-4*s^3*p-4*s^4*dd),
+ xd-s^3*D,
+ y-xd+x,
+ Z-xd-y,
+ a1-y-4*p*xd-4*y*s*dd,
+ tn-(1-u^2*(1-s)^2),
+ ba-u^2*x^2-tn*y^2,
+ bh-u^2*s^2*x^2-tn*xd^2,
+ (-2*x*D+a1)^2*ba^3-(8*Z)^2*x^6*u^6,
+ (2*x*D*y+a1*xd)^2*bh^3-(8*Z*xd)^2*x^6*u^6,
+ 4*s*u^2*v^2-u^2+v^2,
+ zinv*u*v*N-1;
+print("BEGIN_OBJECTA_SPECIALIZED");
+ideal G=std(I);
+print("dimension="+string(dim(G)));
+print("degree="+string(vdim(G)));
+print("groebner_size="+string(size(G)));
+print("END_OBJECTA_SPECIALIZED");
+quit;
