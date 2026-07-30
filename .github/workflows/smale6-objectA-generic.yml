@@ -3,6 +3,11 @@ name: Smale6 ObjectA generic function-field
 on:
   push:
     branches: [smale6-objectA-generic-20260729]
+  pull_request:
+    branches: [main]
+    paths:
+      - 'smale6/objectA_compact_generic.sing'
+      - '.github/workflows/smale6-objectA-generic.yml'
 
 permissions:
   contents: read
