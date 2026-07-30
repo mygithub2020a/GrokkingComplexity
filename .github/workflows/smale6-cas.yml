@@ -1,0 +1,40 @@
+name: Smale6 CAS probe
+
+on:
+  push:
+    branches: [smale6-cas-20260729]
+  pull_request:
+    branches: [main]
+    paths:
+      - 'smale6/**'
+      - '.github/workflows/smale6-cas.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Singular and smoke test
+        run: |
+          set -euxo pipefail
+          sudo apt-get update
+          sudo apt-get install -y singular
+          Singular --version
+          cat > /tmp/smoke.sing <<'EOF'
+          ring r=0,(x,y),dp;
+          ideal I=x2-y,x-y2;
+          ideal G=std(I);
+          print("dim="+string(dim(G)));
+          quit;
+          EOF
+          Singular -q /tmp/smoke.sing | tee smale6-smoke.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: smale6-smoke
+          path: smale6-smoke.log
+          retention-days: 7
