@@ -7,6 +7,10 @@ on:
       - 'smale6/objectA_rootsheet_*_grobcov.sing'
       - '.github/workflows/smale6-objectA-rootsheet.yml'
 
+concurrency:
+  group: smale6-objectA-rootsheet-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
