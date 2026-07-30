@@ -1,0 +1,49 @@
+name: Smale6 ObjectA specialized canary
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'smale6/objectA_specialized_template.sing'
+      - '.github/workflows/smale6-objectA-specialized.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  specialized:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        characteristic: [0, 101, 127]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Singular
+        run: |
+          set -euxo pipefail
+          sudo apt-get update
+          sudo apt-get install -y singular
+          Singular --version | tee singular-version.txt
+      - name: Materialize and run strict specialization
+        shell: bash
+        run: |
+          sed 's/__CHAR__/${{ matrix.characteristic }}/g' smale6/objectA_specialized_template.sing > specialized_${{ matrix.characteristic }}.sing
+          set +e
+          /usr/bin/time -v timeout 160m Singular -q specialized_${{ matrix.characteristic }}.sing > specialized_${{ matrix.characteristic }}.log 2> specialized_${{ matrix.characteristic }}.time
+          status=$?
+          echo "$status" | tee specialized_${{ matrix.characteristic }}.status
+          tail -n 300 specialized_${{ matrix.characteristic }}.log || true
+          exit 0
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: objectA-specialized-${{ matrix.characteristic }}
+          path: |
+            singular-version.txt
+            specialized_${{ matrix.characteristic }}.sing
+            specialized_${{ matrix.characteristic }}.log
+            specialized_${{ matrix.characteristic }}.time
+            specialized_${{ matrix.characteristic }}.status
+          retention-days: 7
